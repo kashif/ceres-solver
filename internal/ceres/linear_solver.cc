@@ -36,6 +36,7 @@
 #include "ceres/iterative_schur_complement_solver.h"
 #include "ceres/schur_complement_solver.h"
 #include "ceres/sparse_normal_cholesky_solver.h"
+#include "ceres/cusparse_conjugate_gradients_solver.h"
 #include "ceres/types.h"
 
 namespace ceres {
@@ -57,6 +58,15 @@ LinearSolver* LinearSolver::Create(const LinearSolver::Options& options) {
                    << "build Ceres with SuiteSparse. Returning NULL.";
       return NULL;
 #endif  // CERES_NO_SUITESPARSE
+
+    case CUSPARSE_CONJUGATE_GRADIENTS:
+#ifndef CERES_NO_CUDA
+      return new CusparseConjugateGradientsSolver(options);
+#else
+      LOG(WARNING) << "CUSPARSE_CONJUGATE_GRADIENTS is not available. Please "
+                   << "build Ceres with CUDA. Returning NULL.";
+      return NULL;
+#endif
 
     case SPARSE_SCHUR:
 #ifndef CERES_NO_SUITESPARSE
