@@ -28,7 +28,7 @@
 #
 # Author: keir@google.com (Keir Mierle)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
 IF (COMMAND cmake_policy)
   CMAKE_POLICY(SET CMP0003 NEW)
@@ -275,6 +275,24 @@ IF (PROTOBUF)
 ELSE (PROTOBUF)
   ADD_DEFINITIONS(-DCERES_DONT_HAVE_PROTOCOL_BUFFERS)
 ENDIF (PROTOBUF)
+
+
+# CUDA support
+OPTION(CUDA
+       "Enable CUDA GPU matrix solver support."
+       OFF)
+
+IF (CUDA)
+  FIND_PACKAGE(CUDA)
+  IF (CUDA_FOUND)
+    INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
+  ELSE(CUDA_FOUND)
+    MESSAGE("-- Can't find CUDA. Continuing without it.")
+    ADD_DEFINITIONS(-DCERES_NO_CUDA)
+  ENDIF (CUDA_FOUND)
+ELSE (CUDA)
+  ADD_DEFINITIONS(-DCERES_NO_CUDA)
+ENDIF (CUDA)
 
 IF (UNIX)
   # Atleast on linux, we need pthreads to be enabled for mutex to
