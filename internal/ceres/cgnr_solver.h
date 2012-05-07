@@ -1,5 +1,5 @@
 // Ceres Solver - A fast non-linear least squares minimizer
-// Copyright 2010, 2011, 2012 Google Inc. All rights reserved.
+// Copyright 2012 Google Inc. All rights reserved.
 // http://code.google.com/p/ceres-solver/
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,73 +26,41 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: sameeragarwal@google.com (Sameer Agarwal)
+// Author: keir@google.com (Keir Mierle)
 
-#include <string>
-#include "ceres/types.h"
+#ifndef CERES_INTERNAL_CGNR_SOLVER_H_
+#define CERES_INTERNAL_CGNR_SOLVER_H_
+
+#include "ceres/internal/scoped_ptr.h"
+#include "ceres/linear_solver.h"
 
 namespace ceres {
+namespace internal {
 
-#define CASESTR(x) case x: return #x
+class BlockJacobiPreconditioner;
 
-const char* LinearSolverTypeToString(LinearSolverType solver_type) {
-  switch (solver_type) {
-    CASESTR(SPARSE_NORMAL_CHOLESKY);
-    CASESTR(DENSE_QR);
-    CASESTR(DENSE_SCHUR);
-    CASESTR(SPARSE_SCHUR);
-    CASESTR(ITERATIVE_SCHUR);
-    CASESTR(CGNR);
-    default:
-      return "UNKNOWN";
-  }
-}
+// A conjugate gradients on the normal equations solver. This directly solves
+// for the solution to
+//
+//   (A^T A + D^T D)x = A^T b
+//
+// as required for solving for x in the least squares sense. Currently only
+// block diagonal preconditioning is supported.
+class CgnrSolver : public LinearSolver {
+ public:
+  explicit CgnrSolver(const LinearSolver::Options& options);
+  virtual Summary Solve(LinearOperator* A,
+                        const double* b,
+                        const LinearSolver::PerSolveOptions& per_solve_options,
+                        double* x);
 
-const char* PreconditionerTypeToString(
-    PreconditionerType preconditioner_type) {
-  switch (preconditioner_type) {
-    CASESTR(IDENTITY);
-    CASESTR(JACOBI);
-    CASESTR(SCHUR_JACOBI);
-    CASESTR(CLUSTER_JACOBI);
-    CASESTR(CLUSTER_TRIDIAGONAL);
-    default:
-      return "UNKNOWN";
-  }
-}
+ private:
+  const LinearSolver::Options options_;
+  scoped_ptr<BlockJacobiPreconditioner> jacobi_preconditioner_;
+  DISALLOW_COPY_AND_ASSIGN(CgnrSolver);
+};
 
-const char* OrderingTypeToString(OrderingType ordering_type) {
-  switch (ordering_type) {
-    CASESTR(NATURAL);
-    CASESTR(USER);
-    CASESTR(SCHUR);
-    default:
-      return "UNKNOWN";
-  }
-}
-
-const char* SolverTerminationTypeToString(
-    SolverTerminationType termination_type) {
-  switch (termination_type) {
-    CASESTR(NO_CONVERGENCE);
-    CASESTR(FUNCTION_TOLERANCE);
-    CASESTR(GRADIENT_TOLERANCE);
-    CASESTR(PARAMETER_TOLERANCE);
-    CASESTR(NUMERICAL_FAILURE);
-    CASESTR(USER_ABORT);
-    CASESTR(USER_SUCCESS);
-    CASESTR(DID_NOT_RUN);
-    default:
-      return "UNKNOWN";
-  }
-}
-
-#undef CASESTR
-
-bool IsSchurType(LinearSolverType type) {
-  return ((type == SPARSE_SCHUR) ||
-          (type == DENSE_SCHUR)  ||
-          (type == ITERATIVE_SCHUR));
-}
-
+}  // namespace internal
 }  // namespace ceres
+
+#endif  // CERES_INTERNAL_CGNR_SOLVER_H_
