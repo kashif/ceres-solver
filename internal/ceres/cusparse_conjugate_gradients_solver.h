@@ -6,6 +6,10 @@
 
 #ifndef CERES_NO_CUDA
 
+#include <cuda_runtime_api.h>
+#include <cusparse_v2.h>
+#include <cublas_v2.h>
+
 #include "ceres/linear_solver.h"
 #include "ceres/internal/macros.h"
 
@@ -27,6 +31,10 @@ class CusparseConjugateGradientsSolver : public CompressedRowSparseMatrixSolver 
       double* x);
 
   const LinearSolver::Options options_;
+  cublasHandle_t cublasHandle;
+  cublasStatus_t cublasStatus;
+  cusparseHandle_t cusparseHandle;
+  cusparseStatus_t cusparseStatus;
   DISALLOW_COPY_AND_ASSIGN(CusparseConjugateGradientsSolver);
 };
 
