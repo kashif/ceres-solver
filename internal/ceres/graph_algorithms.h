@@ -49,7 +49,10 @@ class VertexDegreeLessThan {
       : graph_(graph) {}
 
   bool operator()(const Vertex& lhs, const Vertex& rhs) const {
-    return (graph_.Neighbors(lhs).size() < graph_.Neighbors(rhs).size());
+    if (graph_.Neighbors(lhs).size() == graph_.Neighbors(rhs).size()) {
+      return lhs < rhs;
+    }
+    return graph_.Neighbors(lhs).size() < graph_.Neighbors(rhs).size();
   }
 
  private:

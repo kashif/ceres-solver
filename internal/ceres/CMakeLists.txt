@@ -30,6 +30,7 @@
 
 SET(CERES_INTERNAL_SRC
     block_evaluate_preparer.cc
+    block_jacobi_preconditioner.cc
     block_jacobian_writer.cc
     block_random_access_dense_matrix.cc
     block_random_access_matrix.cc
@@ -37,11 +38,13 @@ SET(CERES_INTERNAL_SRC
     block_sparse_matrix.cc
     block_structure.cc
     canonical_views_clustering.cc
+    cgnr_solver.cc
     compressed_row_jacobian_writer.cc
     compressed_row_sparse_matrix.cc
     conditioned_cost_function.cc
     conjugate_gradients_solver.cc
     corrector.cc
+    cusparse_conjugate_gradients_solver.cc
     dense_qr_solver.cc
     dense_sparse_matrix.cc
     detect_structure.cc
@@ -136,6 +139,14 @@ IF (PROTOBUF_FOUND)
     ${CERES_LIBRARY_DEPENDENCIES}
     ${PROTOBUF_LIBRARY})
 ENDIF (PROTOBUF_FOUND)
+
+IF (CUDA_FOUND)
+  SET(CERES_LIBRARY_DEPENDENCIES
+    ${CERES_LIBRARY_DEPENDENCIES}
+    ${CUDA_LIBRARIES}
+    ${CUDA_CUBLAS_LIBRARIES}
+    ${CUDA_cusparse_LIBRARY})
+ENDIF (CUDA_FOUND)
 
 TARGET_LINK_LIBRARIES(ceres ${CERES_LIBRARY_DEPENDENCIES})
 
